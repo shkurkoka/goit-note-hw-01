@@ -1,15 +1,43 @@
+const { Command } = require('commander');
 const {listContacts, getContactById, removeContact, addContact} = require("./contacts");
 
-const name = "Kirill";
-const email = "gmailmail@gmail.com";
-const phone = "1234567890";
+const program = new Command();
+program
+  .option('-a, --action <type>', 'choose action')
+  .option('-i, --id <type>', 'user id')
+  .option('-n, --name <type>', 'user name')
+  .option('-e, --email <type>', 'user email')
+  .option('-p, --phone <type>', 'user phone');
 
-(async () => {
-    // console.log(await listContacts());
+program.parse(process.argv);
 
-    // console.log(await getContactById("AeHIrLTr6JkxGE6SN-0Rw"));
+const argv = program.opts();
 
-    // console.log(await removeContact("AeHIrLTr6JkxGE6SN-0Rw"));
+async function invokeAction({ action, id, name, email, phone }) {
+    switch (action) {
+        case 'list':
+            const list = await listContacts();
+            console.table(list);
+            break;
 
-    console.log(await addContact(name, email, phone));
-})();
+        case 'get':
+            const contactById = await getContactById(id);
+            console.log(contactById);
+            break;
+
+        case 'add':
+            const addCont = await addContact(name, email, phone);
+            console.log(addCont);
+            break;
+
+        case 'remove':
+            const removeCont = await removeContact(id);
+            console.log(removeCont);
+            break;
+
+        default:
+        console.warn('\x1B[31m Unknown action type!');
+    }
+}
+
+invokeAction(argv);
